@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "dev": "webpack --mode development --watch ./frontend/src/index.js --output-path ./frontend/static/frontend",
-    "build": "webpack --mode production --watch ./frontend/src/index.js --output-path ./frontend/static/frontend"
+    "build": "webpack --mode production --watch ./frontend/src/index.js --output-path ./frontend/static/frontend",
+    "test": "jest --watch"
   },
   "repository": {
     "type": "git",
@@ -23,7 +24,16 @@
     "@babel/plugin-proposal-class-properties": "^7.17.12",
     "@babel/preset-env": "^7.18.2",
     "@babel/preset-react": "^7.17.12",
+    "@wojtekmaj/enzyme-adapter-react-17": "^0.6.7",
     "babel-loader": "^8.2.5",
+    "cheerio": "^1.0.0-rc.3",
+    "enzyme": "^3.11.0",
+    "enzyme-to-json": "^3.6.2",
+    "jest": "^28.0.3",
+    "jest-environment-jsdom": "^28.0.2",
+    "jsdom": "19.0.0",
+    "jsdom-global": "3.0.2",
+    "redux-mock-store": "^1.5.4",
     "webpack": "^5.73.0",
     "webpack-cli": "^4.9.2"
   },
@@ -31,10 +41,20 @@
     "axios": "^0.27.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "react-redux": "^8.0.2",
+    "react-redux": "^7.2.8",
     "react-router-dom": "^5.2.0",
     "redux": "^4.2.0",
     "redux-devtools-extension": "^2.13.9",
+    "redux-promise-middleware": "^5.1.1",
     "redux-thunk": "^2.4.1"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "snapshotSerializers": [
+      "enzyme-to-json/serializer"
+    ],
+    "setupFiles": [
+      "./frontend/src/setupTests.js"
+    ]
   }
 }
