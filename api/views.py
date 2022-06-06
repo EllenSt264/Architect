@@ -1,3 +1,4 @@
+from os import stat
 from django.http import HttpResponse
 from rest_framework import status
 from rest_framework.response import Response
@@ -42,9 +43,31 @@ def getNotes(request):
                         status=status.HTTP_501_NOT_IMPLEMENTED)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'PUT', 'DELETE'])
 def getNote(request, pk):
     if request.method == 'GET':
-        notes = Note.objects.get(id=pk)
-        serializer = NoteSerializer(notes, many=False)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        try:
+            notes = Note.objects.get(id=pk)
+            serializer = NoteSerializer(notes, many=False)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Note.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'PUT':
+        data = request.data
+        note = Note.objects.get(id=pk)
+        serializer = NoteSerializer(instance=note, data=data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response('Invalid data', status=status.HTTP_400_BAD_REQUEST)
+
+    if request.method == 'DELETE':
+        note = Note.objects.get(id=pk)
+        note.delete()
+        return Response('Note was deleted', status=status.HTTP_410_GONE)
+
+    # Request method error
+    return HttpResponse(json.dumps({'detail': 'Wrong method'}),
+                        status=status.HTTP_501_NOT_IMPLEMENTED)

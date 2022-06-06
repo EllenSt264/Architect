@@ -83,3 +83,59 @@ class NotesTest(TestCase):
         self.assertEquals(result['body'], 'Hello world')
         self.assertEquals(result['updated'], getCurrentTime())
         self.assertEquals(result['created_at'], getCurrentTime())
+
+    def test_put_notes(self):
+        """Test that notes matching the given id are updated with new data."""
+        # Add note
+        res = self.client.post('/api/notes/', data=json.dumps({
+            'body': 'Lorem ipsum...',
+        }),
+            content_type='application/json')
+        self.assertEquals(res.status_code, 201)
+        id1 = json.loads(res.content)['id']
+
+        # Get yesterday's date and time
+        yesterday = datetime.now(tz=timezone.utc) - timedelta(1)
+
+        # Force update on note 'created_at' DateTimeField
+        # This simulates that the note was created yesterday
+        note = Note.objects.get(id=id1)
+        Note.objects.filter(pk=note.pk).update(created_at=yesterday)
+
+        # Update note
+        res = self.client.put(f'/api/notes/{id1}/', data=json.dumps({
+            'body': 'This is my updated note!'
+        }),
+            content_type='application/json')
+        self.assertEquals(res.status_code, 200)
+        result = json.loads(res.content)
+        self.assertEquals(result['body'], 'This is my updated note!')
+
+        # Test GET request for updated item
+        res = self.client.get(
+            f'/api/notes/{id1}/', content_type='application/json')
+        self.assertEquals(res.status_code, 200)
+        result = json.loads(res.content)
+        self.assertEquals(result['body'], 'This is my updated note!')
+        self.assertEquals(result['created_at'],
+                          yesterday.strftime('%Y-%m-%dT%H:%M:%S'))
+        self.assertEquals(result['updated'], getCurrentTime())
+
+    def test_delete_note(self):
+        """Test that notes matching the given id are deleted."""
+        # Add note
+        res = self.client.post('/api/notes/', data=json.dumps({
+            'body': 'Hello world.',
+        }),
+            content_type='application/json')
+        self.assertEquals(res.status_code, 201)
+        id1 = json.loads(res.content)['id']
+
+        # Delete note
+        res = self.client.delete(
+            f'/api/notes/{id1}/', content_type='application/json')
+        self.assertEquals(res.status_code, 410)
+
+        res = self.client.get(
+            f'/api/notes/{id1}/', content_type='application/json')
+        self.assertEquals(res.status_code, 404)
