@@ -1,13 +1,16 @@
+"""Testing HTTP methods to the API."""
+
 from django.test import TestCase
+from django.utils import timezone
 from datetime import datetime, timedelta
 import json
 
 from .models import Note
 
 
-def shortenTime(time):
-    time.split('.')
-    return time[0]
+def getCurrentTime():
+    """Get current timezone and stringify to appropriate format."""
+    return datetime.now(tz=timezone.utc).strftime('%Y-%m-%dT%H:%M:%S')
 
 
 class NotesTest(TestCase):
@@ -24,10 +27,8 @@ class NotesTest(TestCase):
 
         result = json.loads(res.content)
         self.assertEquals(result['body'], 'Hello world')
-        self.assertEquals(shortenTime(result['updated']), shortenTime(
-            datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')))
-        self.assertEquals(shortenTime(result['created_at']), shortenTime(
-            datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')))
+        self.assertEquals(result['updated'], getCurrentTime())
+        self.assertEquals(result['created_at'], getCurrentTime())
 
     def test_add_note_invalid(self):
         """Do not allow notes with invalid data to be created."""
@@ -80,7 +81,5 @@ class NotesTest(TestCase):
         self.assertEquals(res.status_code, 200)
         result = json.loads(res.content)
         self.assertEquals(result['body'], 'Hello world')
-        self.assertEquals(shortenTime(result['updated']), shortenTime(
-            datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')))
-        self.assertEquals(shortenTime(result['created_at']), shortenTime(
-            datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')))
+        self.assertEquals(result['updated'], getCurrentTime())
+        self.assertEquals(result['created_at'], getCurrentTime())
