@@ -37,3 +37,50 @@ class NotesTest(TestCase):
             content_type='application/json',
         )
         self.assertEquals(res.status_code, 400)
+
+    def test_get_notes(self):
+        """Test the GET request for all notes."""
+        # Add first note
+        res = self.client.post('/api/notes/', data=json.dumps({
+            'body': 'Hello world',
+        }),
+            content_type='application/json')
+        self.assertEquals(res.status_code, 201)
+        id1 = json.loads(res.content)['id']
+
+        # Add second note
+        res = self.client.post('/api/notes/', data=json.dumps({
+            'body': 'Lorem ipsum...',
+        }),
+            content_type='application/json')
+        self.assertEquals(res.status_code, 201)
+        id2 = json.loads(res.content)['id']
+
+        # Test GET request for both items
+        res = self.client.get('/api/notes/', content_type='application/json')
+        self.assertEquals(res.status_code, 200)
+        result = json.loads(res.content)
+        self.assertEquals(len(result), 2)
+        self.assertTrue(result[0]['id'] == id1 or result[1]['id'] == id1)
+        self.assertTrue(result[0]['id'] == id2 or result[1]['id'] == id2)
+
+    def test_get_single_note(self):
+        """Test the GET request for single note."""
+        # Add note
+        res = self.client.post('/api/notes/', data=json.dumps({
+            'body': 'Hello world',
+        }),
+            content_type='application/json')
+        self.assertEquals(res.status_code, 201)
+        id1 = json.loads(res.content)['id']
+
+        # Test GET request for individual item
+        res = self.client.get(
+            f'/api/notes/{id1}/', content_type='application/json')
+        self.assertEquals(res.status_code, 200)
+        result = json.loads(res.content)
+        self.assertEquals(result['body'], 'Hello world')
+        self.assertEquals(shortenTime(result['updated']), shortenTime(
+            datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')))
+        self.assertEquals(shortenTime(result['created_at']), shortenTime(
+            datetime.now().strftime('%Y-%m-%dT%H:%M:%S.%fZ')))
