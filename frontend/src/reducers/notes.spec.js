@@ -7,7 +7,7 @@ import { GET_NOTES } from "../actions/types";
 const notesReducer = notes;
 
 const initialState = {
-  notes: [],
+  allnotes: [],
   targetNote: {},
   loading: false,
   error: null,
@@ -15,7 +15,7 @@ const initialState = {
 
 describe("Root Reducer", () => {
   let store = createStore(rootReducer);
-  test("loaded correctly", () => {
+  it("should load correctly", () => {
     expect(store.getState().notes).toEqual(initialState);
   });
 });
@@ -36,7 +36,7 @@ describe("Notes reducer", () => {
       type: GET_NOTES,
       payload: mynotes,
     });
-    expect(newState.notes).toEqual(mynotes);
+    expect(newState.allnotes).toEqual(mynotes);
     expect(newState.loading).toEqual(false);
     expect(newState.error).toEqual(null);
   });
@@ -44,7 +44,7 @@ describe("Notes reducer", () => {
   it("should handle NOTES_LOADING as intended", () => {
     const newState = notesReducer(initialState, { type: "NOTES_LOADING" });
     expect(newState).toEqual({
-      notes: [],
+      allnotes: [],
       targetNote: {},
       loading: true,
       error: null,
@@ -58,7 +58,7 @@ describe("Notes reducer", () => {
     });
     expect(newState.error).toEqual("Error!");
     expect(newState.loading).toEqual(false);
-    expect(newState.notes).toEqual([]);
+    expect(newState.allnotes).toEqual([]);
     expect(newState.targetNote).toEqual({});
   });
 });

@@ -1,6 +1,11 @@
 import { GET_NOTES, NOTES_LOADING, NOTE_REQUEST_FAIL } from "../actions/types";
 
-const initialState = { notes: [], targetNote: {}, loading: false, error: null };
+const initialState = {
+  allnotes: [],
+  targetNote: {},
+  loading: false,
+  error: null,
+};
 
 export default (state = initialState, action) => {
   switch (action.type) {
@@ -17,13 +22,13 @@ export default (state = initialState, action) => {
       });
       return {
         ...state,
-        notes: notesArr,
+        allnotes: notesArr,
         loading: false,
       };
     case NOTE_REQUEST_FAIL:
       return {
         ...state,
-        notes: [],
+        allnotes: [],
         targetNote: {},
         loading: false,
         error: action.payload,
