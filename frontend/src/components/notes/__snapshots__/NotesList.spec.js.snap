@@ -1,0 +1,38 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`NotesList should render with the given state from Redux store 1`] = `
+<Connect(NotesList)>
+  <NotesList
+    getNotes={[Function]}
+    notes={
+      Array [
+        Object {
+          "body": "foo",
+          "id": 1,
+          "updated": "2022-05-16T07:00:00",
+        },
+        Object {
+          "body": "bar",
+          "id": 2,
+          "updated": "2022-05-18T10:45:00",
+        },
+      ]
+    }
+  >
+    <div
+      id="notesList"
+    >
+      <p
+        key="1"
+      >
+        foo
+      </p>
+      <p
+        key="2"
+      >
+        bar
+      </p>
+    </div>
+  </NotesList>
+</Connect(NotesList)>
+`;
