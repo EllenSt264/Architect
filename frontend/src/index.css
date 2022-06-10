@@ -1,0 +1,14 @@
+@tailwind base;
+
+@tailwind components;
+
+@tailwind utilities;
+
+/* app CSS reset */
+
+body,
+div,
+p {
+  margin: 0;
+  padding: 0;
+}
