@@ -12,7 +12,9 @@ exports[`NotesList should render with the given state from Redux store 1`] = `
           "updated": "2022-05-16T07:00:00",
         },
         Object {
-          "body": "bar",
+          "body": "Hello react! 
+
+Here's some text. ",
           "id": 2,
           "updated": "2022-05-18T10:45:00",
         },
@@ -22,16 +24,70 @@ exports[`NotesList should render with the given state from Redux store 1`] = `
     <div
       id="notesList"
     >
-      <p
+      <ListItem
         key="1"
+        note={
+          Object {
+            "body": "foo",
+            "id": 1,
+            "updated": "2022-05-16T07:00:00",
+          }
+        }
       >
-        foo
-      </p>
-      <p
+        <div
+          className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+        >
+          <h3
+            className="noteCard-title font-inter capitalize text-white dark:text-white text-1xl tracking-wide"
+          >
+            foo
+          </h3>
+          <p>
+            <span
+              className="noteCard-summary text-gray-300 dark:text-gray-200 tracking-wide"
+            />
+            <span
+              className="noteCard-time text-orange-200 dark:text-gray-300 font-roboto text-sm tracking-wide ml-2"
+            >
+              16/05/2022
+            </span>
+          </p>
+        </div>
+      </ListItem>
+      <ListItem
         key="2"
+        note={
+          Object {
+            "body": "Hello react! 
+
+Here's some text. ",
+            "id": 2,
+            "updated": "2022-05-18T10:45:00",
+          }
+        }
       >
-        bar
-      </p>
+        <div
+          className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+        >
+          <h3
+            className="noteCard-title font-inter capitalize text-white dark:text-white text-1xl tracking-wide"
+          >
+            Hello react!
+          </h3>
+          <p>
+            <span
+              className="noteCard-summary text-gray-300 dark:text-gray-200 tracking-wide"
+            >
+              Here's some text.
+            </span>
+            <span
+              className="noteCard-time text-orange-200 dark:text-gray-300 font-roboto text-sm tracking-wide ml-2"
+            >
+              18/05/2022
+            </span>
+          </p>
+        </div>
+      </ListItem>
     </div>
   </NotesList>
 </Connect(NotesList)>

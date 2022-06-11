@@ -6,6 +6,8 @@ import thunk from "redux-thunk";
 
 import MockProvider from "../../utils/MockProvider";
 import NotesList from "./NotesList";
+import ListItem from "./ListItem";
+import notes from "../../reducers/notes";
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
@@ -23,13 +25,10 @@ describe("NotesList", () => {
         },
         {
           id: 2,
-          body: "bar",
+          body: "Hello react! \n\nHere's some text. ",
           updated: "2022-05-18T10:45:00",
         },
       ],
-      targetNote: {},
-      loading: false,
-      error: null,
     },
   };
 
@@ -41,10 +40,6 @@ describe("NotesList", () => {
 
   afterEach(() => {
     wrapper.unmount();
-  });
-
-  it("should render a <div />", () => {
-    expect(wrapper.find("div").length).toEqual(1);
   });
 
   it("should render with the given state from Redux store", () => {
@@ -59,8 +54,22 @@ describe("NotesList", () => {
 
   it("should display a list of all notes from store", () => {
     const notesContainer = wrapper.find("#notesList");
-    expect(notesContainer.children().length).toEqual(2);
-    expect(notesContainer.children().at(0).text()).toEqual("foo");
-    expect(notesContainer.children().at(1).text()).toEqual("bar");
+    const noteTitleDiv = notesContainer.find(".noteCard-title");
+    const noteSummaryDiv = notesContainer.find(".noteCard-summary");
+    const noteTimeDiv = notesContainer.find(".noteCard-time");
+
+    // assertions for first note
+    expect(noteTitleDiv.at(0).text()).toEqual("foo");
+    expect(noteSummaryDiv.at(0).text()).toEqual("");
+    expect(noteTimeDiv.at(0).text()).toEqual("16/05/2022");
+
+    // assertions for second note
+    expect(noteTitleDiv.at(1).text()).toEqual("Hello react!");
+    expect(noteSummaryDiv.at(1).text()).toEqual("Here's some text.");
+    expect(noteTimeDiv.at(1).text()).toEqual("18/05/2022");
+  });
+
+  it("should render the ListItem component", () => {
+    expect(wrapper.containsMatchingElement(<ListItem />)).toEqual(true);
   });
 });
