@@ -1,10 +1,9 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import { mount } from "enzyme";
-import { Link } from "react-router-dom";
 
 import MockProvider from "../../utils/MockProvider";
 import ListItem from "./ListItem";
-import { MemoryRouter } from "react-router-dom";
 
 describe("List item", () => {
   let wrapper;
@@ -30,13 +29,14 @@ describe("List item", () => {
   };
 
   beforeEach(() => {
-    wrapper = mount(<ListItem note={props} />, {
-      wrappingComponent: MockProvider,
-    });
-  });
-
-  it("should render a <div />", () => {
-    expect(wrapper.find("div").length).toEqual(1);
+    wrapper = mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <ListItem note={props} />
+      </MemoryRouter>,
+      {
+        wrappingComponent: MockProvider,
+      }
+    );
   });
 
   it("should construct a title from the notes body to display in <h1 /> tag", () => {
@@ -55,5 +55,9 @@ describe("List item", () => {
     const date = new Date(props.updated).toLocaleDateString();
     expect(date).toEqual("18/05/2022");
     expect(wrapper.find(".noteCard-time").text()).toEqual(date);
+  });
+
+  it("should contain a link", () => {
+    expect(wrapper.getDOMNode().getAttribute("href")).toEqual("/note/1");
   });
 });

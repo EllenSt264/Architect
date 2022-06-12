@@ -1,4 +1,9 @@
-import { GET_NOTES, NOTES_LOADING, NOTE_REQUEST_FAIL } from "../actions/types";
+import {
+  GET_NOTES,
+  GET_NOTE,
+  NOTES_LOADING,
+  NOTE_REQUEST_FAIL,
+} from "../actions/types";
 
 const initialState = {
   allnotes: [],
@@ -23,6 +28,12 @@ export default (state = initialState, action) => {
       return {
         ...state,
         allnotes: notesArr,
+        loading: false,
+      };
+    case GET_NOTE:
+      return {
+        ...state,
+        targetNote: action.payload,
         loading: false,
       };
     case NOTE_REQUEST_FAIL:

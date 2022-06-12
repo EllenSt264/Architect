@@ -34,25 +34,38 @@ Here's some text. ",
           }
         }
       >
-        <div
+        <Link
           className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+          to="/note/1"
         >
-          <h3
-            className="noteCard-title font-inter capitalize text-white dark:text-white text-1xl tracking-wide"
+          <LinkAnchor
+            className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+            href="/note/1"
+            navigate={[Function]}
           >
-            foo
-          </h3>
-          <p>
-            <span
-              className="noteCard-summary text-gray-300 dark:text-gray-200 tracking-wide"
-            />
-            <span
-              className="noteCard-time text-orange-200 dark:text-gray-300 font-roboto text-sm tracking-wide ml-2"
+            <a
+              className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+              href="/note/1"
+              onClick={[Function]}
             >
-              16/05/2022
-            </span>
-          </p>
-        </div>
+              <h3
+                className="noteCard-title font-inter capitalize text-white dark:text-white text-1xl tracking-wide"
+              >
+                foo
+              </h3>
+              <p>
+                <span
+                  className="noteCard-summary text-gray-300 dark:text-gray-200 tracking-wide"
+                />
+                <span
+                  className="noteCard-time text-orange-200 dark:text-gray-300 font-roboto text-sm tracking-wide ml-2"
+                >
+                  16/05/2022
+                </span>
+              </p>
+            </a>
+          </LinkAnchor>
+        </Link>
       </ListItem>
       <ListItem
         key="2"
@@ -66,27 +79,40 @@ Here's some text. ",
           }
         }
       >
-        <div
+        <Link
           className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+          to="/note/2"
         >
-          <h3
-            className="noteCard-title font-inter capitalize text-white dark:text-white text-1xl tracking-wide"
+          <LinkAnchor
+            className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+            href="/note/2"
+            navigate={[Function]}
           >
-            Hello react!
-          </h3>
-          <p>
-            <span
-              className="noteCard-summary text-gray-300 dark:text-gray-200 tracking-wide"
+            <a
+              className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+              href="/note/2"
+              onClick={[Function]}
             >
-              Here's some text.
-            </span>
-            <span
-              className="noteCard-time text-orange-200 dark:text-gray-300 font-roboto text-sm tracking-wide ml-2"
-            >
-              18/05/2022
-            </span>
-          </p>
-        </div>
+              <h3
+                className="noteCard-title font-inter capitalize text-white dark:text-white text-1xl tracking-wide"
+              >
+                Hello react!
+              </h3>
+              <p>
+                <span
+                  className="noteCard-summary text-gray-300 dark:text-gray-200 tracking-wide"
+                >
+                  Here's some text.
+                </span>
+                <span
+                  className="noteCard-time text-orange-200 dark:text-gray-300 font-roboto text-sm tracking-wide ml-2"
+                >
+                  18/05/2022
+                </span>
+              </p>
+            </a>
+          </LinkAnchor>
+        </Link>
       </ListItem>
     </div>
   </NotesList>

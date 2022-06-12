@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 const constructTitle = (note) => {
   var title = note.split("\n")[0];
@@ -20,7 +21,10 @@ const constructTime = (note) => {
 
 const ListItem = ({ note }) => {
   return (
-    <div className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900">
+    <Link
+      to={`/note/${note.id}`}
+      className="block p-4 mx-3 my-4 box-border shadow-md dark:shadow-violet-600/25 rounded-md bg-gradient-to-r from-[#8352f1] to-[#95ddff] dark:bg-transparent dark:from-gray-900 dark:via-violet-900 dark:to-gray-900"
+    >
       <h3 className="noteCard-title font-inter capitalize text-white dark:text-white text-1xl tracking-wide">
         {constructTitle(note.body)}
       </h3>
@@ -32,7 +36,7 @@ const ListItem = ({ note }) => {
           {constructTime(note.updated)}
         </span>
       </p>
-    </div>
+    </Link>
   );
 };
 

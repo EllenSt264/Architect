@@ -1,6 +1,9 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
+
 import { mount } from "enzyme";
 import toJson from "enzyme-to-json";
+
 import configureStore from "redux-mock-store";
 import thunk from "redux-thunk";
 
@@ -33,7 +36,12 @@ describe("NotesList", () => {
   };
 
   beforeEach(() => {
-    wrapper = mount(<NotesList />, { wrappingComponent: MockProvider });
+    wrapper = mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <NotesList />
+      </MemoryRouter>,
+      { wrappingComponent: MockProvider }
+    );
     const provider = wrapper.getWrappingComponent();
     provider.setProps({ customStore: mockStore(myMockStore) });
   });
