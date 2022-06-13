@@ -2,7 +2,7 @@ import { createStore } from "redux";
 import rootReducer from "./index";
 
 import notes from "./notes";
-import { GET_NOTES, GET_NOTE } from "../actions/types";
+import { GET_NOTES, GET_NOTE, ADD_NOTE } from "../actions/types";
 
 const notesReducer = notes;
 
@@ -48,6 +48,17 @@ describe("Notes reducer", () => {
       payload: mynote,
     });
     expect(newState.targetNote).toEqual(mynote);
+    expect(newState.loading).toEqual(false);
+    expect(newState.error).toEqual(null);
+  });
+
+  it("should handle ADD_NOTE as intended", () => {
+    const newnote = { 2: { id: 2, body: "my new note" } };
+    const newState = notesReducer(undefined, {
+      type: ADD_NOTE,
+      payload: newnote,
+    });
+    expect(newState.targetNote).toEqual(newnote);
     expect(newState.loading).toEqual(false);
     expect(newState.error).toEqual(null);
   });

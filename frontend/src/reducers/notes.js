@@ -1,6 +1,7 @@
 import {
   GET_NOTES,
   GET_NOTE,
+  ADD_NOTE,
   NOTES_LOADING,
   NOTE_REQUEST_FAIL,
 } from "../actions/types";
@@ -31,6 +32,7 @@ export default (state = initialState, action) => {
         loading: false,
       };
     case GET_NOTE:
+    case ADD_NOTE:
       return {
         ...state,
         targetNote: action.payload,

@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 
 import NotesList from "./NotesList";
+import AddButton from "../AddButton";
 
 export class Dashboard extends Component {
   render() {
@@ -20,6 +21,9 @@ export class Dashboard extends Component {
         <div className="relative my-5">
           <div className="text-left text-xl font-semibold font-inter md:font-bold tracking-wider dark:text-white text-yellow-200 pl-5">
             <h3>Notes</h3>
+          </div>
+          <div className="absolute top-0 md:-top-1 right-4 h-6 w-6">
+            <AddButton />
           </div>
         </div>
         <div>

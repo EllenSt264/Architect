@@ -1,4 +1,5 @@
 import React from "react";
+import { MemoryRouter } from "react-router-dom";
 import { mount } from "enzyme";
 import { screen, render } from "@testing-library/react";
 import "@testing-library/jest-dom";
@@ -6,12 +7,15 @@ import "@testing-library/jest-dom";
 import MockProvider from "../../utils/MockProvider";
 import Dashboard from "./Dashboard";
 import NotesList from "./NotesList";
+import AddButton from "../AddButton";
 
 describe("Dashboard UI components", () => {
   beforeEach(() => {
     render(
       <MockProvider>
-        <Dashboard />
+        <MemoryRouter initialEntries={["/"]}>
+          <Dashboard />
+        </MemoryRouter>
       </MockProvider>
     );
   });
@@ -36,7 +40,12 @@ describe("Dashboard behaviour", () => {
   let wrapper;
 
   beforeEach(() => {
-    wrapper = mount(<Dashboard />, { wrappingComponent: MockProvider });
+    wrapper = mount(
+      <MemoryRouter initialEntries={["/"]}>
+        <Dashboard />
+      </MemoryRouter>,
+      { wrappingComponent: MockProvider }
+    );
   });
 
   afterEach(() => {
@@ -45,5 +54,9 @@ describe("Dashboard behaviour", () => {
 
   it("should render the NotesList component", () => {
     expect(wrapper.containsMatchingElement(<NotesList />)).toEqual(true);
+  });
+
+  it("should render the AddButton component", () => {
+    expect(wrapper.containsMatchingElement(<AddButton />)).toEqual(true);
   });
 });

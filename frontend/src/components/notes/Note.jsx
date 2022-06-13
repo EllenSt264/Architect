@@ -1,17 +1,23 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
-import { getNote } from "../../actions/notes";
+import { getNote, addNote } from "../../actions/notes";
 
 export class Note extends Component {
   constructor(props) {
     super(props);
 
     const { targetNote } = this.props;
-    this.state = { targetNote, dataLoaded: false };
+    this.state = { targetNote, dataLoaded: false, isNew: false };
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
+    if (this.props.match.params.id === "new") {
+      this.setState({ isNew: true });
+    }
     this.loadData();
   }
 
@@ -34,20 +40,37 @@ export class Note extends Component {
     this.setState({ dataLoaded: true });
   }
 
+  handleChange(event) {
+    this.setState({
+      targetNote: { body: event.target.value },
+    });
+  }
+
+  handleSubmit = async () => {
+    const { id } = this.props.match.params;
+    const { targetNote } = this.state;
+
+    if (id === "new" && Object.keys(targetNote).length !== 0) {
+      await this.props.addNote(targetNote.body);
+    }
+
+    this.props.history.push("/");
+  };
+
   render() {
     return (
       <>
-        {!this.state.dataLoaded && (
+        {!this.state.dataLoaded && !this.state.isNew && (
           <div className="h-screen w-screen pt-8 pl-5 bg-[#8984f6] dark:bg-[#1e163a]">
             Loading...
           </div>
         )}
-        {this.state.dataLoaded && (
+        {(this.state.dataLoaded || this.state.isNew) && (
           <div className="h-screen w-screen pt-8 pl-5 bg-[#8984f6] dark:bg-[#1e163a]">
             {/* Header */}
             <div className="flex justify-between">
               {/* Back button */}
-              <button onClick={() => this.props.history.push("/")}>
+              <button onClick={this.handleSubmit}>
                 <svg
                   className="w-7 h-7 text-white"
                   fill="currentColor"
@@ -69,6 +92,7 @@ export class Note extends Component {
                 name="noteBody"
                 id="noteBody"
                 value={this.state.targetNote?.body}
+                onChange={this.handleChange}
                 placeholder="Start typing..."
                 className="resize-none h-full p-10 flex-1 bg-[#8984f6] dark:bg-[#1e163a] text-gray-100 placeholder:text-gray-300 placeholder:font-inter border-none focus:border-none focus:outline-none font-inter tracking-wide"
               ></textarea>
@@ -89,4 +113,4 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export default connect(mapStateToProps, { getNote })(Note);
+export default connect(mapStateToProps, { getNote, addNote })(Note);

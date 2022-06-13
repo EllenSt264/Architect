@@ -3,7 +3,7 @@ import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import promiseMiddleware from "redux-promise-middleware";
 
-import { getNotes, getNote } from "./notes";
+import { getNotes, getNote, addNote } from "./notes";
 
 const mockStore = configureMockStore([thunk, promiseMiddleware()]);
 
@@ -96,6 +96,53 @@ describe("Notes actions", () => {
 
         expect(mockAxios.get).toHaveBeenCalledTimes(1);
         expect(mockAxios.get).toHaveBeenCalledWith("/api/note/1/");
+
+        expect(actions[0].type).toEqual("NOTES_LOADING");
+        expect(actions[1].type).toEqual("NOTE_REQUEST_FAIL");
+        expect(actions[1].payload.error).toEqual("Something went wrong");
+      }
+    });
+  });
+
+  describe("addNote action creator", () => {
+    it("should dispatch ADD_NOTE and return the correct response", async () => {
+      mockAxios.post.mockImplementationOnce(() =>
+        Promise.resolve({
+          data: { id: 3, body: "foo bar" }, // we want the payload to match this
+        })
+      );
+
+      await store.dispatch(addNote("foo bar"));
+      const actions = store.getActions();
+
+      expect.assertions(5);
+
+      expect(mockAxios.post).toHaveBeenCalledTimes(1);
+      expect(mockAxios.post).toHaveBeenCalledWith("/api/notes/", {
+        body: "foo bar",
+      });
+
+      expect(actions[0].type).toEqual("NOTES_LOADING");
+      expect(actions[1].type).toEqual("ADD_NOTE");
+      expect(actions[1].payload).toEqual({ id: 3, body: "foo bar" });
+    });
+
+    it("should handle errors for addNote appropriately", async () => {
+      mockAxios.post.mockImplementationOnce(() =>
+        Promise.reject({ error: "Something went wrong" })
+      );
+
+      try {
+        await store.dispatch(addNote("foo bar"));
+      } catch {
+        const actions = store.getActions();
+
+        expect.assertions(5);
+
+        expect(mockAxios.post).toHaveBeenCalledTimes(1);
+        expect(mockAxios.post).toHaveBeenCalledWith("/api/notes/", {
+          body: "foo bar",
+        });
 
         expect(actions[0].type).toEqual("NOTES_LOADING");
         expect(actions[1].type).toEqual("NOTE_REQUEST_FAIL");
