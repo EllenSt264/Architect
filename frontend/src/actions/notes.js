@@ -3,6 +3,7 @@ import {
   GET_NOTES,
   GET_NOTE,
   ADD_NOTE,
+  EDIT_NOTE,
   NOTES_LOADING,
   NOTE_REQUEST_FAIL,
 } from "./types";
@@ -45,6 +46,22 @@ export const addNote = (values) => async (dispatch) => {
     const res = await axios.post("/api/notes/", { body: values });
     dispatch({
       type: ADD_NOTE,
+      payload: res.data,
+    });
+  } catch (err) {
+    dispatch({
+      type: NOTE_REQUEST_FAIL,
+      payload: err.message,
+    });
+  }
+};
+
+export const editNote = (id, values) => async (dispatch) => {
+  dispatch({ type: NOTES_LOADING });
+  try {
+    const res = await axios.put(`/api/notes/${id}/`, { body: values });
+    dispatch({
+      type: EDIT_NOTE,
       payload: res.data,
     });
   } catch (err) {

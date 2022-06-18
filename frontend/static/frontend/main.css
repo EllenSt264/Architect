@@ -591,6 +591,14 @@ video {
   margin-left: 0.5rem;
 }
 
+.mr-10 {
+  margin-right: 2.5rem;
+}
+
+.ml-4 {
+  margin-left: 1rem;
+}
+
 .box-border {
   box-sizing: border-box;
 }
@@ -641,6 +649,10 @@ video {
 
 .w-7 {
   width: 1.75rem;
+}
+
+.w-10 {
+  width: 2.5rem;
 }
 
 .flex-1 {
@@ -736,6 +748,10 @@ video {
   text-align: center;
 }
 
+.align-top {
+  vertical-align: top;
+}
+
 .font-inter {
   font-family: "Inter", sans-serif;
 }
@@ -812,6 +828,16 @@ video {
 .text-orange-200 {
   --tw-text-opacity: 1;
   color: rgb(254 215 170 / var(--tw-text-opacity));
+}
+
+.text-amber-100 {
+  --tw-text-opacity: 1;
+  color: rgb(254 243 199 / var(--tw-text-opacity));
+}
+
+.text-amber-200 {
+  --tw-text-opacity: 1;
+  color: rgb(253 230 138 / var(--tw-text-opacity));
 }
 
 .text-gray-100 {

@@ -2,6 +2,7 @@ import {
   GET_NOTES,
   GET_NOTE,
   ADD_NOTE,
+  EDIT_NOTE,
   NOTES_LOADING,
   NOTE_REQUEST_FAIL,
 } from "../actions/types";
@@ -33,6 +34,7 @@ export default (state = initialState, action) => {
       };
     case GET_NOTE:
     case ADD_NOTE:
+    case EDIT_NOTE:
       return {
         ...state,
         targetNote: action.payload,

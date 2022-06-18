@@ -3,7 +3,7 @@ import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import promiseMiddleware from "redux-promise-middleware";
 
-import { getNotes, getNote, addNote } from "./notes";
+import { getNotes, getNote, addNote, editNote } from "./notes";
 
 const mockStore = configureMockStore([thunk, promiseMiddleware()]);
 
@@ -141,6 +141,52 @@ describe("Notes actions", () => {
 
         expect(mockAxios.post).toHaveBeenCalledTimes(1);
         expect(mockAxios.post).toHaveBeenCalledWith("/api/notes/", {
+          body: "foo bar",
+        });
+
+        expect(actions[0].type).toEqual("NOTES_LOADING");
+        expect(actions[1].type).toEqual("NOTE_REQUEST_FAIL");
+        expect(actions[1].payload.error).toEqual("Something went wrong");
+      }
+    });
+  });
+
+  describe("editNote action creator", () => {
+    it("should dispatch EDIT_NOTE and return the correct response", async () => {
+      mockAxios.put.mockImplementationOnce(() =>
+        Promise.resolve({
+          data: { id: 1, body: "my updated note" },
+        })
+      );
+
+      await store.dispatch(editNote(1, "my updated note"));
+
+      expect(mockAxios.put).toHaveBeenCalledTimes(1);
+      expect(mockAxios.put).toHaveBeenCalledWith("/api/notes/1/", {
+        body: "my updated note",
+      });
+
+      const actions = store.getActions();
+
+      expect(actions[0].type).toEqual("NOTES_LOADING");
+      expect(actions[1].type).toEqual("EDIT_NOTE");
+      expect(actions[1].payload).toEqual({ id: 1, body: "my updated note" });
+    });
+
+    it("should handle errors for editNote appropriately", async () => {
+      mockAxios.put.mockImplementationOnce(() =>
+        Promise.reject({ error: "Something went wrong" })
+      );
+
+      try {
+        await store.dispatch(editNote(1, "foo bar"));
+      } catch {
+        const actions = store.getActions();
+
+        expect.assertions(5);
+
+        expect(mockAxios.put).toHaveBeenCalledTimes(1);
+        expect(mockAxios.put).toHaveBeenCalledWith("/api/notes/1/", {
           body: "foo bar",
         });
 

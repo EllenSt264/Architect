@@ -4,6 +4,7 @@ import configureStore from "redux-mock-store";
 import mockAxios from "axios";
 
 import { screen, render, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
 import thunk from "redux-thunk";
@@ -53,9 +54,15 @@ describe("Note UI components", () => {
     it("should not render a textarea or button on initial page load", () => {
       const textarea = screen.queryByRole("textbox");
       const backBtn = screen.queryByRole("button", { name: /back/i });
+      const deleteModalBtn = screen.queryByRole("button", {
+        name: /delete_modal/i,
+      });
+      const submitBtn = screen.queryByRole("button", { name: /done/i });
 
       expect(textarea).toBeNull();
       expect(backBtn).toBeNull();
+      expect(deleteModalBtn).toBeNull();
+      expect(submitBtn).toBeNull();
     });
 
     it("should render the textarea and buttons after a delay", async () => {
@@ -72,10 +79,35 @@ describe("Note UI components", () => {
       // Then the rest of our component should render
       const textarea = await screen.findByRole("textbox");
       const backBtn = await screen.findByRole("button", { name: /back/i });
+      const deleteModalBtn = await screen.findByRole("button", {
+        name: /delete_modal/i,
+      });
 
       expect(textarea).toBeInTheDocument();
       expect(backBtn).toBeEnabled();
+      expect(deleteModalBtn).toBeEnabled();
       expect(textarea.value).toBe("foo");
+    });
+
+    it("should render the done button after a user has started typing", async () => {
+      // first we need to wait for the loading div to disappear
+      await waitFor(() => {
+        const loadingDiv = screen.queryByText("Loading...");
+        expect(loadingDiv).toBeNull();
+      });
+
+      // submit button should not render until a user starts typing
+      var submitBtn = screen.queryByRole("button", { name: /done/i });
+      expect(submitBtn).toBeNull();
+
+      // simulate a user typing
+      const textarea = await screen.findByRole("textbox");
+      expect(textarea.value).toBe("foo");
+      userEvent.type(textarea, "foo bar");
+
+      // submit button should now render
+      submitBtn = await screen.findByRole("button", { name: /done/i });
+      expect(submitBtn).toBeEnabled();
     });
   });
 
@@ -102,13 +134,15 @@ describe("Note UI components", () => {
     });
 
     it("should not render the delete button", () => {
-      // const settingBtn = screen.queryByTestId("settingsBtn");
-      const deleteBtn = screen.queryByRole("button", { name: /delete/i });
+      const deleteBtn = screen.queryByRole("button", { name: /delete_modal/i });
       expect(deleteBtn).toBeNull();
     });
 
-    it("should render the render the back button", () => {
+    it("should render the render the submit and back button", () => {
+      const submitBtn = screen.getByRole("button", { name: /done/i });
       const backBtn = screen.getByRole("button", { name: /back/i });
+
+      expect(submitBtn).toBeEnabled();
       expect(backBtn).toBeEnabled();
     });
   });
@@ -119,6 +153,7 @@ describe("Note behaviour", () => {
 
   describe("Behaviour for GET, PUT and DELETE methods", () => {
     beforeEach(() => {
+      store = mockStore(myMockStore);
       const id = 2;
       wrapper = mount(
         <MemoryRouter initialEntries={[`/note/${id}`]}>
@@ -129,12 +164,13 @@ describe("Note behaviour", () => {
         }
       );
       const provider = wrapper.getWrappingComponent();
-      provider.setProps({ customStore: mockStore(myMockStore) });
+      provider.setProps({ customStore: store });
       // This bypasses the loading div
       wrapper.find(Note).children().setState({ dataLoaded: true });
     });
 
     afterEach(() => {
+      jest.clearAllMocks();
       wrapper.unmount();
     });
 
@@ -144,7 +180,7 @@ describe("Note behaviour", () => {
         expect(props).toMatchObject({ match: {} });
       });
 
-      it("should redirect to homepage on back button click", () => {
+      it("should redirect to homepage on back button click", async () => {
         const props = wrapper.find(Note).children().first().props();
 
         // starting url should be "/note/:id"
@@ -156,6 +192,7 @@ describe("Note behaviour", () => {
         backBtn.simulate("click");
 
         // url should change to home "/" after button click
+        await new Promise((resolve, reject) => setTimeout(resolve, 100));
         expect(props.history.location.pathname).toEqual("/");
       });
     });
@@ -189,6 +226,103 @@ describe("Note behaviour", () => {
         );
       });
     });
+
+    describe("Component rendering and state for PUT note action", () => {
+      it("should return the data for a single note matching a given id", () => {
+        expect(wrapper.find(Note).children().props().targetNote).toEqual(
+          myMockStore.notes.allnotes.filter((note) => note.id == 2)[0]
+        );
+      });
+
+      it("should render a textarea with the state note body as its default value", () => {
+        const componentNote = myMockStore.notes.allnotes.filter(
+          (note) => note.id == 2
+        );
+        const container = wrapper.children().find("div");
+        const textarea = container.children().find("textarea");
+
+        expect(textarea.length).toEqual(1);
+        expect(textarea.get(0).props.value).toEqual(componentNote.body);
+      });
+
+      it("should setState on textarea change then update the note on back button click", async () => {
+        const event = { target: { value: "I've updated note 2" } };
+
+        mockAxios.put.mockImplementationOnce(() =>
+          Promise.resolve({
+            data: { id: 2, body: event.target.value },
+          })
+        );
+
+        // trigger onChange event listener
+        wrapper.find("textarea").simulate("change", event);
+
+        // check if textarea value has updated
+        expect(wrapper.find("textarea").get(0).props.value).toEqual(
+          "I've updated note 2"
+        );
+        // test if state has updated
+        expect(wrapper.find(Note).children().state("targetNote")).toEqual({
+          body: "I've updated note 2",
+        });
+
+        // test that editNote is dispatched on back button click
+        const backBtn = wrapper.findWhere(
+          (node) => node.name() === "button" && node.text() === "back"
+        );
+        backBtn.simulate("click");
+
+        expect(mockAxios.put).toHaveBeenCalledTimes(1);
+        expect(mockAxios.put).toHaveBeenCalledWith("/api/notes/2/", {
+          body: "I've updated note 2",
+        });
+
+        const actions = await store.getActions();
+
+        expect(actions[0].type).toEqual("NOTES_LOADING");
+        expect(actions[1].type).toEqual("EDIT_NOTE");
+        expect(actions[1].payload.body).toEqual("I've updated note 2");
+      });
+
+      it("should setState on textarea change then update the note on submit button click", async () => {
+        const event = { target: { value: "I've updated note 2" } };
+
+        mockAxios.put.mockImplementationOnce(() =>
+          Promise.resolve({
+            data: { id: 2, body: event.target.value },
+          })
+        );
+
+        // trigger onChange event listener
+        wrapper.find("textarea").simulate("change", event);
+
+        // check if textarea value has updated
+        expect(wrapper.find("textarea").get(0).props.value).toEqual(
+          "I've updated note 2"
+        );
+        // test if state has updated
+        expect(wrapper.find(Note).children().state("targetNote")).toEqual({
+          body: "I've updated note 2",
+        });
+
+        // test that editNote is dispatched on back button click
+        const submitBtn = wrapper.findWhere(
+          (node) => node.name() === "button" && node.text() === "Done"
+        );
+        submitBtn.simulate("click");
+
+        expect(mockAxios.put).toHaveBeenCalledTimes(1);
+        expect(mockAxios.put).toHaveBeenCalledWith("/api/notes/2/", {
+          body: "I've updated note 2",
+        });
+
+        const actions = await store.getActions();
+
+        expect(actions[0].type).toEqual("NOTES_LOADING");
+        expect(actions[1].type).toEqual("EDIT_NOTE");
+        expect(actions[1].payload.body).toEqual("I've updated note 2");
+      });
+    });
   });
 
   describe("Behaviour for POST methods", () => {
@@ -209,12 +343,13 @@ describe("Note behaviour", () => {
     });
 
     afterEach(() => {
+      jest.clearAllMocks();
       wrapper.unmount();
     });
 
     describe("Props and navigation", () => {
       it("should have match params in its props", () => {
-        const props = wrapper.find(Note).children().first().props();
+        const props = wrapper.find(Note).children().props();
         expect(props).toMatchObject({ match: {} });
       });
 
