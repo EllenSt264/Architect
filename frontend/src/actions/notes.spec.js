@@ -3,7 +3,7 @@ import configureMockStore from "redux-mock-store";
 import thunk from "redux-thunk";
 import promiseMiddleware from "redux-promise-middleware";
 
-import { getNotes, getNote, addNote, editNote } from "./notes";
+import { getNotes, getNote, addNote, editNote, deleteNote } from "./notes";
 
 const mockStore = configureMockStore([thunk, promiseMiddleware()]);
 
@@ -189,6 +189,49 @@ describe("Notes actions", () => {
         expect(mockAxios.put).toHaveBeenCalledWith("/api/notes/1/", {
           body: "foo bar",
         });
+
+        expect(actions[0].type).toEqual("NOTES_LOADING");
+        expect(actions[1].type).toEqual("NOTE_REQUEST_FAIL");
+        expect(actions[1].payload.error).toEqual("Something went wrong");
+      }
+    });
+  });
+
+  describe("deleteNote action creator", () => {
+    it("should dispatch GET_NOTE and return the correct response", async () => {
+      mockAxios.delete.mockImplementationOnce(() =>
+        Promise.resolve({
+          data: { id: 1, body: "hello world" },
+        })
+      );
+
+      await store.dispatch(deleteNote(1));
+      const actions = store.getActions();
+
+      expect.assertions(5);
+
+      expect(mockAxios.delete).toHaveBeenCalledTimes(1);
+      expect(mockAxios.delete).toHaveBeenCalledWith("/api/notes/1/");
+
+      expect(actions[0].type).toEqual("NOTES_LOADING");
+      expect(actions[1].type).toEqual("DELETE_NOTE");
+      expect(actions[1].payload).toEqual(1); // should only return the id
+    });
+
+    it("should handle errors for getNote appropriately", async () => {
+      mockAxios.delete.mockImplementationOnce(() =>
+        Promise.reject({ error: "Something went wrong" })
+      );
+
+      try {
+        await store.dispatch(getNote(1));
+      } catch {
+        const actions = store.getActions();
+
+        expect.assertions(5);
+
+        expect(mockAxios.delete).toHaveBeenCalledTimes(1);
+        expect(mockAxios.delete).toHaveBeenCalledWith("/api/note/1/");
 
         expect(actions[0].type).toEqual("NOTES_LOADING");
         expect(actions[1].type).toEqual("NOTE_REQUEST_FAIL");

@@ -4,6 +4,7 @@ import {
   GET_NOTE,
   ADD_NOTE,
   EDIT_NOTE,
+  DELETE_NOTE,
   NOTES_LOADING,
   NOTE_REQUEST_FAIL,
 } from "./types";
@@ -63,6 +64,22 @@ export const editNote = (id, values) => async (dispatch) => {
     dispatch({
       type: EDIT_NOTE,
       payload: res.data,
+    });
+  } catch (err) {
+    dispatch({
+      type: NOTE_REQUEST_FAIL,
+      payload: err.message,
+    });
+  }
+};
+
+export const deleteNote = (id) => async (dispatch) => {
+  dispatch({ type: NOTES_LOADING });
+  try {
+    await axios.delete(`/api/notes/${id}/`);
+    dispatch({
+      type: DELETE_NOTE,
+      payload: id,
     });
   } catch (err) {
     dispatch({

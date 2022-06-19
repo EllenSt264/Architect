@@ -3,6 +3,7 @@ import {
   GET_NOTE,
   ADD_NOTE,
   EDIT_NOTE,
+  DELETE_NOTE,
   NOTES_LOADING,
   NOTE_REQUEST_FAIL,
 } from "../actions/types";
@@ -40,6 +41,9 @@ export default (state = initialState, action) => {
         targetNote: action.payload,
         loading: false,
       };
+    case DELETE_NOTE:
+      delete state[action.payload];
+      return { ...state };
     case NOTE_REQUEST_FAIL:
       return {
         ...state,

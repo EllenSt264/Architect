@@ -13,6 +13,7 @@ import { MemoryRouter, Route } from "react-router-dom";
 
 import MockProvider from "../../utils/MockProvider";
 import Note from "./Note";
+import Modal from "../Modal";
 
 const middlewares = [thunk];
 const mockStore = configureStore(middlewares);
@@ -146,6 +147,94 @@ describe("Note UI components", () => {
       expect(backBtn).toBeEnabled();
     });
   });
+
+  describe("Modal component", () => {
+    beforeEach(() => {
+      render(
+        <Provider store={mockStore(myMockStore)}>
+          <MemoryRouter initialEntries={[`/note/1`]}>
+            <Route path="/note/:id" component={Note} />
+          </MemoryRouter>
+        </Provider>
+      );
+    });
+
+    it("should not render without user input", () => {
+      const modal = screen.queryByRole("dialog");
+      expect(modal).toBeNull();
+    });
+
+    it("should render on settings button click", async () => {
+      // we use await because of the delay with the getNote axios request
+      const modalBtn = await screen.findByRole("button", {
+        name: /delete_modal/i,
+      });
+      expect(modalBtn).toBeEnabled();
+
+      // modal should render on button click
+      userEvent.click(modalBtn);
+      const modal = await screen.findByRole("dialog");
+      expect(modal).toBeInTheDocument();
+
+      // modal buttons should render
+      const deleteBtn = await screen.findByRole("button", {
+        name: /delete_note/i,
+      });
+      const closeBtn = await screen.findByRole("button", { name: /cancel/i });
+      expect(deleteBtn).toBeEnabled();
+      expect(closeBtn).toBeEnabled();
+    });
+
+    it("should close the modal on exit button click", async () => {
+      const modalBtn = await screen.findByRole("button", {
+        name: /delete_modal/i,
+      });
+      expect(modalBtn).toBeEnabled();
+
+      // modal must render first
+      userEvent.click(modalBtn);
+      var modal = await screen.findByRole("dialog");
+      expect(modal).toBeInTheDocument();
+
+      const closeBtn = await screen.findByRole("button", { name: /close/i });
+      await userEvent.click(closeBtn);
+      modal = screen.queryByRole("dialog");
+      expect(modal).toBeNull();
+    });
+
+    it("should close the modal on cancel button click", async () => {
+      const modalBtn = await screen.findByRole("button", {
+        name: /delete_modal/i,
+      });
+
+      expect(modalBtn).toBeEnabled();
+
+      // modal must render first
+      userEvent.click(modalBtn);
+      var modal = await screen.findByRole("dialog");
+      expect(modal).toBeInTheDocument();
+
+      const cancelBtn = await screen.findByRole("button", { name: /cancel/i });
+      await userEvent.click(cancelBtn);
+      modal = screen.queryByRole("dialog");
+      expect(modal).toBeNull();
+    });
+
+    it("should close the modal when clicking outside the modal container", async () => {
+      const modalBtn = await screen.findByRole("button", {
+        name: /delete_modal/i,
+      });
+
+      // render the modal first
+      userEvent.click(modalBtn);
+      const modalContainer = await screen.findByRole("dialog");
+      expect(modalContainer).toBeInTheDocument();
+
+      await userEvent.click(modalContainer);
+      const modal = screen.queryByRole("dialog");
+      expect(modal).toBeNull();
+    });
+  });
 });
 
 describe("Note behaviour", () => {
@@ -195,39 +284,7 @@ describe("Note behaviour", () => {
         await new Promise((resolve, reject) => setTimeout(resolve, 100));
         expect(props.history.location.pathname).toEqual("/");
       });
-    });
 
-    describe("Component rendering and state for GET note action", () => {
-      it("should return a single note matching a given id in props", () => {
-        expect(wrapper.find(Note).children().props().targetNote).toEqual(
-          myMockStore.notes.allnotes.filter((note) => note.id == 2)[0]
-        );
-      });
-
-      it("should update the state with the target note body", () => {
-        const targetNote = myMockStore.notes.allnotes.filter(
-          (note) => note.id == 2
-        )[0];
-
-        expect(wrapper.find(Note).children().state("targetNote")).toEqual(
-          targetNote
-        );
-      });
-
-      it("should render a textarea with the state note body as its default value", () => {
-        const targetNote = myMockStore.notes.allnotes.filter(
-          (note) => note.id === 2
-        )[0];
-        expect(wrapper.find("textarea").length).toEqual(1);
-        // Update wrapper to reflect updated state
-        wrapper.update();
-        expect(wrapper.find("textarea").get(0).props.value).toEqual(
-          targetNote.body
-        );
-      });
-    });
-
-    describe("Component rendering and state for PUT note action", () => {
       it("should return the data for a single note matching a given id", () => {
         expect(wrapper.find(Note).children().props().targetNote).toEqual(
           myMockStore.notes.allnotes.filter((note) => note.id == 2)[0]
@@ -245,6 +302,24 @@ describe("Note behaviour", () => {
         expect(textarea.get(0).props.value).toEqual(componentNote.body);
       });
 
+      it("should contain the Modal component", () => {
+        expect(wrapper.containsMatchingElement(Modal)).toEqual(true);
+      });
+    });
+
+    describe("Component rendering and state for GET note action", () => {
+      it("should update the state with the target note body", () => {
+        const targetNote = myMockStore.notes.allnotes.filter(
+          (note) => note.id == 2
+        )[0];
+
+        expect(wrapper.find(Note).children().state("targetNote")).toEqual(
+          targetNote
+        );
+      });
+    });
+
+    describe("Component rendering and state for PUT note action", () => {
       it("should setState on textarea change then update the note on back button click", async () => {
         const event = { target: { value: "I've updated note 2" } };
 
@@ -321,6 +396,74 @@ describe("Note behaviour", () => {
         expect(actions[0].type).toEqual("NOTES_LOADING");
         expect(actions[1].type).toEqual("EDIT_NOTE");
         expect(actions[1].payload.body).toEqual("I've updated note 2");
+      });
+    });
+
+    describe("Component rendering and state for DELETE note action", () => {
+      it("should delete the note on settings button click", async () => {
+        mockAxios.delete.mockImplementationOnce(() =>
+          Promise.resolve({
+            data: { id: 2 },
+          })
+        );
+
+        // render modal
+        const deleteModalBtn = wrapper.findWhere(
+          (node) => node.name() === "button" && node.text() === "delete_modal"
+        );
+        deleteModalBtn.simulate("click");
+
+        // click delete button within modal to test that deleteNote is dispatched
+        const deleteBtn = await wrapper.find("#deleteNoteBtn");
+        deleteBtn.simulate("click");
+
+        expect(mockAxios.delete).toHaveBeenCalledTimes(1);
+        expect(mockAxios.delete).toHaveBeenCalledWith("/api/notes/2/");
+
+        await new Promise((resolve, reject) => setTimeout(resolve, 0));
+        const actions = store.getActions();
+
+        expect(actions[0].type).toEqual("NOTES_LOADING");
+        expect(actions[1].type).toEqual("DELETE_NOTE");
+        expect(actions[1].payload).toEqual("2");
+      });
+
+      it("should delete the note if updated with an empty string", async () => {
+        const event = { target: { value: "" } };
+
+        mockAxios.put.mockImplementationOnce(() =>
+          Promise.resolve({
+            data: { id: 2, body: event.target.value },
+          })
+        );
+
+        // trigger onChange event listener
+        wrapper.find("textarea").simulate("change", event);
+
+        // check if textarea value has updated
+        expect(wrapper.find("textarea").get(0).props.value).toEqual("");
+        // test if state has updated
+        expect(wrapper.find(Note).children().state("targetNote")).toEqual({
+          body: "",
+        });
+
+        // test that deleteNote is dispatched on back button click
+        const backBtn = wrapper.findWhere(
+          (node) => node.name() === "button" && node.text() === "back"
+        );
+        backBtn.simulate("click");
+
+        // editNote should NOT be called
+        expect(mockAxios.put).toHaveBeenCalledTimes(0);
+        // deleteNote should be called
+        expect(mockAxios.delete).toHaveBeenCalledTimes(1);
+        expect(mockAxios.delete).toHaveBeenCalledWith("/api/notes/2/");
+
+        const actions = await store.getActions();
+
+        expect(actions[0].type).toEqual("NOTES_LOADING");
+        expect(actions[1].type).toEqual("DELETE_NOTE");
+        expect(actions[1].payload).toEqual("2");
       });
     });
   });

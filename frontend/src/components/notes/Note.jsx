@@ -1,7 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 
-import { getNote, addNote, editNote } from "../../actions/notes";
+import { getNote, addNote, editNote, deleteNote } from "../../actions/notes";
+import Modal from "../Modal";
 
 export class Note extends Component {
   constructor(props) {
@@ -13,10 +14,12 @@ export class Note extends Component {
       dataLoaded: false,
       isNew: false,
       isChanged: false,
+      showModal: false,
     };
 
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.deleteNote = this.deleteNote.bind(this);
   }
 
   componentDidMount() {
@@ -56,12 +59,24 @@ export class Note extends Component {
     const { id } = this.props.match.params;
     const { targetNote } = this.state;
 
-    if (id === "new" && Object.keys(targetNote).length !== 0) {
+    if (
+      id !== "new" &&
+      (!targetNote.body || targetNote.body.trim().length === 0)
+    ) {
+      await this.props.deleteNote(id);
+    } else if (id === "new" && Object.keys(targetNote).length !== 0) {
       await this.props.addNote(targetNote.body);
     } else if (id !== "new") {
       await this.props.editNote(id, targetNote.body);
     }
 
+    this.props.history.push("/");
+  };
+
+  deleteNote = async () => {
+    const { id } = this.props.match.params;
+
+    await this.props.deleteNote(id);
     this.props.history.push("/");
   };
 
@@ -97,7 +112,13 @@ export class Note extends Component {
               <div>
                 {/* Delete modal */}
                 {!this.state.isNew && (
-                  <button type="button" className="mx-3 mr-10 text-amber-100">
+                  <button
+                    type="button"
+                    className="mx-3 mr-10 text-amber-100"
+                    onClick={() => {
+                      this.setState({ showModal: true });
+                    }}
+                  >
                     <svg
                       className="w-6 h-6"
                       fill="currentColor"
@@ -137,6 +158,13 @@ export class Note extends Component {
             </div>
           </div>
         )}
+
+        {this.state.showModal && (
+          <Modal
+            onDismiss={() => this.setState({ showModal: false })}
+            deleteNote={this.deleteNote}
+          />
+        )}
       </>
     );
   }
@@ -151,4 +179,9 @@ const mapStateToProps = (state, ownProps) => {
   };
 };
 
-export default connect(mapStateToProps, { getNote, addNote, editNote })(Note);
+export default connect(mapStateToProps, {
+  getNote,
+  addNote,
+  editNote,
+  deleteNote,
+})(Note);

@@ -2,7 +2,13 @@ import { createStore } from "redux";
 import rootReducer from "./index";
 
 import notes from "./notes";
-import { GET_NOTES, GET_NOTE, ADD_NOTE, EDIT_NOTE } from "../actions/types";
+import {
+  GET_NOTES,
+  GET_NOTE,
+  ADD_NOTE,
+  EDIT_NOTE,
+  DELETE_NOTE,
+} from "../actions/types";
 
 const notesReducer = notes;
 
@@ -70,6 +76,16 @@ describe("Notes reducer", () => {
       payload: mynote,
     });
     expect(newState.targetNote).toEqual(mynote);
+    expect(newState.loading).toEqual(false);
+    expect(newState.error).toEqual(null);
+  });
+
+  it("should handle DELETE_NOTE as intended", () => {
+    const newState = notesReducer(undefined, {
+      type: DELETE_NOTE,
+      payload: 1,
+    });
+    expect(newState.targetNote).toEqual({});
     expect(newState.loading).toEqual(false);
     expect(newState.error).toEqual(null);
   });
